@@ -13,7 +13,7 @@ app.get('/api', (req, res) => {
 	res.send(thumbs);
 });
 
-app.post('/api/log', (req, res) => {
+app.post('/api/blog', (req, res) => {
 	const id = makeSimpleMongoId();
 	const { content } = req.body;
 	const blogInfo = {
@@ -28,8 +28,7 @@ app.post('/api/log', (req, res) => {
 	if (thumbExists) {
 		const bufferThumbs = fs.readFileSync(THUMB_LOCATION);
 		const thumbs = JSON.parse(bufferThumbs.toString());
-		const newThumbs = thumbs.push(blogInfo);
-		fs.writeFileSync(THUMB_LOCATION, JSON.stringify(newThumbs));
+		fs.writeFileSync(THUMB_LOCATION, JSON.stringify([...thumbs, blogInfo]));
 	} else {
 		fs.writeFileSync(THUMB_LOCATION, JSON.stringify([blogInfo]));
 	}

@@ -1,5 +1,8 @@
 const fs = require('fs');
 const express = require('express');
+const { marked } = require('marked');
+const { JSDOM } = require('jsdom');
+const mecab = require('mecab-ya');
 
 const app = express();
 const port = 3000;
@@ -13,12 +16,84 @@ app.get('/api', (req, res) => {
 	res.send(thumbs);
 });
 
-app.post('/api/blog', (req, res) => {
-	const id = makeSimpleMongoId();
+app.get('/test', async (req, res) => {
+	async function getNouns(text) {
+		return new Promise((resolve, reject) => {
+			mecab.nouns(text, (err, result) => {
+				if (err) {
+					reject();
+				}
+				resolve({
+					success: true,
+					data: result
+				});
+			});
+		});
+	}
+	const response = await getNouns('아버지가방에들어가신다');
+	res.send(response);
+});
+
+app.post('/api/blog', async (req, res) => {
 	const { content } = req.body;
+	const htmlString = marked.parse(content);
+	const jsDom = new JSDOM(htmlString);
+	const { document } = jsDom.window;
+	const titleElem = document.querySelector('h1');
+
+	if (titleElem === null) {
+		console.log('request failed.');
+		res.send({
+			success: false,
+			message: 'There is no title.'
+		});
+		return;
+	}
+
+	const boldElems = document.querySelectorAll('strong');
+	if (boldElems.length === 0) {
+		console.log('request failed.');
+		res.send({
+			success: false,
+			message: 'There is no summaries.'
+		});
+		return;
+	}
+
+	const summaries = Array.from(boldElems).map((elem) => elem.textContent);
+	const title = titleElem.textContent;
+
+	const id = makeSimpleMongoId();
+
+	async function getTags(text) {
+		return new Promise((resolve, reject) => {
+			mecab.nouns(text, (err, result) => {
+				if (err) {
+					reject();
+				}
+				resolve(result);
+			});
+		});
+	}
+
+	const joinSentence = [title, ...summaries].join(' ');
+	const rawTags = await getTags(joinSentence);
+	const dupRemovedTags = rawTags.reduce((acc, cur) => {
+		if (acc.indexOf(cur) < 0) {
+			acc.push(cur);
+			return acc;
+		}
+		return acc;
+	}, []);
+
 	const blogInfo = {
 		id,
-		uploadTime: getCurrentISOTime()
+		attribute: {
+			uploadTime: getCurrentISOTime(),
+			title,
+			summaries,
+			tags: dupRemovedTags
+		}
 	};
 
 	fs.writeFileSync(`./blog/${id}.md`, content, { flag: 'wx' });
@@ -33,7 +108,10 @@ app.post('/api/blog', (req, res) => {
 		fs.writeFileSync(THUMB_LOCATION, JSON.stringify([blogInfo]));
 	}
 
-	res.send(blogInfo);
+	res.send({
+		success: true,
+		message: htmlString
+	});
 
 	function makeSimpleMongoId() {
 		var result = '';

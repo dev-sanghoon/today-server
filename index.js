@@ -5,7 +5,6 @@ const { JSDOM } = require('jsdom');
 const mecab = require('mecab-ya');
 
 const app = express();
-const port = 3000;
 
 app.use(express.json());
 
@@ -129,6 +128,7 @@ app.post('/api/blog', async (req, res) => {
 	}
 });
 
+const port = 3000;
 app.listen(port, () => {
 	console.log(`Example app listening on port ${port}`);
 });

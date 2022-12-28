@@ -29,20 +29,32 @@ app.post('/api/blog', async (req, res) => {
 		return;
 	}
 
-	const { title, summaries } = saveTargets;
+	const { content, title, summaries } = saveTargets;
 	const tags = await getTags([title, ...summaries].join(', '));
 	const uploadTime = new Date();
 
-	const blogSchema = new mongoose.Schema({
-		title: String,
-		summaries: [String],
-		content: String,
-		tags: [String],
-		uploadTime: Date
-	});
-	const Blog = mongoose.model('Blog', blogSchema);
-	const thisBlog = new Blog({ ...saveTargets, tags, uploadTime });
-	await thisBlog.save();
+	const thumbnailSchema = new mongoose.Schema(
+		{
+			title: String,
+			uploadTime: Date,
+			summaries: [String],
+			tags: [String]
+		},
+		{ collection: 'thumbnails' }
+	);
+	const Thumbnail = mongoose.model('Thumbnail', thumbnailSchema);
+	const thumbnail = new Thumbnail({ title, uploadTime, summaries, tags });
+	await thumbnail.save();
+
+	const articleSchema = new mongoose.Schema(
+		{
+			content: String
+		},
+		{ collection: 'articles' }
+	);
+	const Article = mongoose.model('Article', articleSchema);
+	const article = new Article({ content });
+	await article.save();
 
 	response.success = true;
 	res.send(response);

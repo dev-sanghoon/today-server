@@ -3,8 +3,13 @@ const express = require('express');
 const { marked } = require('marked');
 const { JSDOM } = require('jsdom');
 const mecab = require('mecab-ya');
+const mongoose = require('mongoose');
 
 const app = express();
+
+mongoose.connect('mongodb://127.0.0.1:27017/test');
+mongoose.set('debug', true);
+mongoose.set('strictQuery', false);
 
 app.use(express.json());
 
@@ -31,11 +36,6 @@ async function getTags(text) {
 			resolve(dupRemoved);
 		});
 	});
-}
-
-function getCurrentISOTime() {
-	const now = new Date();
-	return now.toISOString();
 }
 
 function refinePostBlog(reqBody) {
@@ -68,7 +68,6 @@ function refinePostBlog(reqBody) {
 	Object.assign(result, { title });
 
 	const boldElems = document.querySelectorAll('strong');
-	console.log(htmlString);
 	if (boldElems.length === 0) {
 		return result;
 	}
@@ -95,42 +94,22 @@ app.post('/api/blog', async (req, res) => {
 
 	const { title, summaries } = saveTargets;
 	const tags = await getTags([title, ...summaries].join(', '));
-	const uploadTime = getCurrentISOTime();
+	const uploadTime = new Date();
 
-	console.log('expected save:', { ...saveTargets, tags, uploadTime });
+	const blogSchema = new mongoose.Schema({
+		title: String,
+		summaries: [String],
+		content: String,
+		tags: [String],
+		uploadTime: Date
+	});
+	const Blog = mongoose.model('Blog', blogSchema);
+	const thisBlog = new Blog({ ...saveTargets, tags, uploadTime });
+	await thisBlog.save();
 
 	response.success = true;
 	res.send(response);
 });
-
-// function saveLocal(content) {
-// 	const THUMB_LOCATION = './blog/thumbs.json';
-
-// 	const id = makeSimpleMongoId();
-// 	const blogInfo = {
-// 		id,
-// 		uploadTime: getCurrentISOTime()
-// 	};
-// 	fs.writeFileSync(`./blog/${id}.md`, content, { flag: 'wx' });
-// 	const thumbExists = fs.existsSync(THUMB_LOCATION);
-// 	if (thumbExists) {
-// 		const bufferThumbs = fs.readFileSync(THUMB_LOCATION);
-// 		const thumbs = JSON.parse(bufferThumbs.toString());
-// 		fs.writeFileSync(THUMB_LOCATION, JSON.stringify([...thumbs, blogInfo]));
-// 	} else {
-// 		fs.writeFileSync(THUMB_LOCATION, JSON.stringify([blogInfo]));
-// 	}
-
-// 	function makeSimpleMongoId() {
-// 		var result = '';
-// 		var characters = 'abcdefghijklmnopqrstuvwxyz0123456789';
-// 		var charactersLength = characters.length;
-// 		for (var i = 0; i < 24; i++) {
-// 			result += characters.charAt(Math.floor(Math.random() * charactersLength));
-// 		}
-// 		return result;
-// 	}
-// }
 
 const port = 3000;
 app.listen(port, () => {

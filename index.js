@@ -20,6 +20,39 @@ app.get('/api', (req, res) => {
 	res.send(thumbs);
 });
 
+app.post('/api/blog', async (req, res) => {
+	const response = { success: false };
+
+	const { verified, ...saveTargets } = refinePostBlog(req.body);
+	if (!verified) {
+		res.send(response);
+		return;
+	}
+
+	const { title, summaries } = saveTargets;
+	const tags = await getTags([title, ...summaries].join(', '));
+	const uploadTime = new Date();
+
+	const blogSchema = new mongoose.Schema({
+		title: String,
+		summaries: [String],
+		content: String,
+		tags: [String],
+		uploadTime: Date
+	});
+	const Blog = mongoose.model('Blog', blogSchema);
+	const thisBlog = new Blog({ ...saveTargets, tags, uploadTime });
+	await thisBlog.save();
+
+	response.success = true;
+	res.send(response);
+});
+
+const port = 3000;
+app.listen(port, () => {
+	console.log(`Example app listening on port ${port}`);
+});
+
 async function getTags(text) {
 	return new Promise((resolve, reject) => {
 		mecab.nouns(text, (err, result) => {
@@ -82,36 +115,3 @@ function refinePostBlog(reqBody) {
 	result.verified = true;
 	return result;
 }
-
-app.post('/api/blog', async (req, res) => {
-	const response = { success: false };
-
-	const { verified, ...saveTargets } = refinePostBlog(req.body);
-	if (!verified) {
-		res.send(response);
-		return;
-	}
-
-	const { title, summaries } = saveTargets;
-	const tags = await getTags([title, ...summaries].join(', '));
-	const uploadTime = new Date();
-
-	const blogSchema = new mongoose.Schema({
-		title: String,
-		summaries: [String],
-		content: String,
-		tags: [String],
-		uploadTime: Date
-	});
-	const Blog = mongoose.model('Blog', blogSchema);
-	const thisBlog = new Blog({ ...saveTargets, tags, uploadTime });
-	await thisBlog.save();
-
-	response.success = true;
-	res.send(response);
-});
-
-const port = 3000;
-app.listen(port, () => {
-	console.log(`Example app listening on port ${port}`);
-});

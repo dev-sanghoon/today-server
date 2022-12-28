@@ -28,11 +28,11 @@ const Feed = mongoose.model('Feed', feedSchema);
 
 app.use(express.json());
 
-app.get('/api', (req, res) => {
+app.get('/api/feeds', (req, res) => {
 	res.send([{ id: 'this is test' }]);
 });
 
-app.post('/api/blog', async (req, res) => {
+app.post('/api/article', async (req, res) => {
 	const response = { success: false };
 
 	const { verified, ...saveTargets } = refinePostBlog(req.body);

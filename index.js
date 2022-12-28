@@ -28,8 +28,10 @@ const Feed = mongoose.model('Feed', feedSchema);
 
 app.use(express.json());
 
-app.get('/api/feeds', (req, res) => {
-	res.send([{ id: 'this is test' }]);
+app.get('/api/feeds', async (req, res) => {
+	const queries = await Feed.find();
+	const response = queries.map(({ title, summaries, tags }) => ({ title, summaries, tags }));
+	res.send(response);
 });
 
 app.post('/api/article', async (req, res) => {

@@ -1,4 +1,3 @@
-const fs = require('fs');
 const express = require('express');
 const { marked } = require('marked');
 const { JSDOM } = require('jsdom');
@@ -11,13 +10,26 @@ mongoose.connect('mongodb://127.0.0.1:27017/test');
 mongoose.set('debug', true);
 mongoose.set('strictQuery', false);
 
+const feedSchema = new mongoose.Schema(
+	{
+		title: String,
+		uploadTime: Date,
+		summaries: [String],
+		tags: [String],
+		article: { type: mongoose.Schema.Types.ObjectId, ref: 'Article' }
+	},
+	{ collection: 'feeds' }
+);
+
+const articleSchema = new mongoose.Schema({ content: String }, { collection: 'articles' });
+
+const Article = mongoose.model('Article', articleSchema);
+const Feed = mongoose.model('Feed', feedSchema);
+
 app.use(express.json());
 
 app.get('/api', (req, res) => {
-	const THUMB_LOCATION = './blog/thumbs.json';
-	const bufferThumbs = fs.readFileSync(THUMB_LOCATION);
-	const thumbs = JSON.parse(bufferThumbs.toString());
-	res.send(thumbs);
+	res.send([{ id: 'this is test' }]);
 });
 
 app.post('/api/blog', async (req, res) => {
@@ -33,21 +45,6 @@ app.post('/api/blog', async (req, res) => {
 	const tags = await getTags([title, ...summaries].join(', '));
 	const uploadTime = new Date();
 
-	const feedSchema = new mongoose.Schema(
-		{
-			title: String,
-			uploadTime: Date,
-			summaries: [String],
-			tags: [String],
-			article: { type: mongoose.Schema.Types.ObjectId, ref: 'Article' }
-		},
-		{ collection: 'feeds' }
-	);
-
-	const articleSchema = new mongoose.Schema({ content: String }, { collection: 'articles' });
-
-	const Article = mongoose.model('Article', articleSchema);
-	const Feed = mongoose.model('Feed', feedSchema);
 	const article = new Article({ content });
 	await article.save();
 	const feed = new Feed({ title, uploadTime, summaries, tags, article: article._id });

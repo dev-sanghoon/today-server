@@ -30,8 +30,18 @@ app.use(express.json());
 
 app.get('/api/feeds', async (req, res) => {
 	const queries = await Feed.find();
-	const response = queries.map(({ title, summaries, tags }) => ({ title, summaries, tags }));
+	const response = queries.map(({ title, summaries, tags, article }) => ({
+		title,
+		summaries,
+		tags,
+		article
+	}));
 	res.send(response);
+});
+
+app.get('/api/article/:id', async (req, res) => {
+	const article = await Article.findOne({ _id: req.params.id });
+	res.send({ content: marked.parse(article.content) });
 });
 
 app.post('/api/article', async (req, res) => {

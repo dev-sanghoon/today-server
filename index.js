@@ -3,6 +3,7 @@ const { marked } = require('marked');
 const { JSDOM } = require('jsdom');
 const mecab = require('mecab-ya');
 const mongoose = require('mongoose');
+const jsonwebtoken = require('jsonwebtoken');
 
 const app = express();
 

@@ -21,6 +21,7 @@
 	"dependencies": {
 		"express": "4.18.2",
 		"jsdom": "^20.0.3",
+		"jsonwebtoken": "^9.0.0",
 		"marked": "^4.2.4",
 		"mecab-ya": "^0.1.1",
 		"mongoose": "^6.8.1"

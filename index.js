@@ -67,6 +67,23 @@ app.post('/api/article', async (req, res) => {
 	res.send(response);
 });
 
+app.post('/api/login', (req, res) => {
+	const result = { success: false };
+	const { id, password } = req.body;
+	if (!id || !password) {
+		res.send(result);
+		return;
+	}
+
+	console.log('id, pw gotten:', id, password);
+
+	result.success = true;
+	const JWT_SECRET = 'thisissecret';
+	const createdToken = jsonwebtoken.sign({ user: 'admin' }, JWT_SECRET);
+	res.append('Set-Cookie', `access_token=${createdToken}; Path=/; Max-Age=300; HttpOnly`);
+	res.send(result);
+});
+
 const port = 3000;
 app.listen(port, () => {
 	console.log(`Example app listening on port ${port}`);

@@ -80,6 +80,7 @@ app.post('/api/login', (req, res) => {
 		const createdToken = jsonwebtoken.sign({ user: process.env.ID }, process.env.JWT_SECRET);
 		res.append('Set-Cookie', `access_token=${createdToken}; Path=/; Max-Age=300; HttpOnly`);
 		res.send(result);
+		return;
 	}
 
 	res.send(result);

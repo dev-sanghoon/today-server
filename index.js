@@ -4,6 +4,9 @@ const { JSDOM } = require('jsdom');
 const mecab = require('mecab-ya');
 const mongoose = require('mongoose');
 const jsonwebtoken = require('jsonwebtoken');
+const cookieParser = require('cookie-parser');
+
+require('dotenv').config();
 
 const app = express();
 
@@ -28,6 +31,7 @@ const Article = mongoose.model('Article', articleSchema);
 const Feed = mongoose.model('Feed', feedSchema);
 
 app.use(express.json());
+app.use(cookieParser());
 
 app.get('/api/feeds', async (req, res) => {
 	const queries = await Feed.find();
@@ -70,17 +74,14 @@ app.post('/api/article', async (req, res) => {
 app.post('/api/login', (req, res) => {
 	const result = { success: false };
 	const { id, password } = req.body;
-	if (!id || !password) {
+
+	if (id === process.env.ID && password === process.env.PASSWORD) {
+		result.success = true;
+		const createdToken = jsonwebtoken.sign({ user: process.env.ID }, process.env.JWT_SECRET);
+		res.append('Set-Cookie', `access_token=${createdToken}; Path=/; Max-Age=300; HttpOnly`);
 		res.send(result);
-		return;
 	}
 
-	console.log('id, pw gotten:', id, password);
-
-	result.success = true;
-	const JWT_SECRET = 'thisissecret';
-	const createdToken = jsonwebtoken.sign({ user: 'admin' }, JWT_SECRET);
-	res.append('Set-Cookie', `access_token=${createdToken}; Path=/; Max-Age=300; HttpOnly`);
 	res.send(result);
 });
 

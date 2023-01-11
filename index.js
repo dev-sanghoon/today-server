@@ -1,7 +1,6 @@
 const express = require('express');
 const { marked } = require('marked');
 const { JSDOM } = require('jsdom');
-const mecab = require('mecab-ya');
 const mongoose = require('mongoose');
 const jsonwebtoken = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
@@ -71,7 +70,7 @@ app.post('/api/article', async (req, res) => {
 	}
 
 	const { content, title, summaries } = saveTargets;
-	const tags = await getTags([title, ...summaries].join(', '));
+	const tags = [];
 	const uploadTime = new Date();
 
 	const article = new Article({ content });
@@ -103,24 +102,6 @@ const port = 3000;
 app.listen(port, () => {
 	console.log(`Example app listening on port ${port}`);
 });
-
-async function getTags(text) {
-	return new Promise((resolve, reject) => {
-		mecab.nouns(text, (err, result) => {
-			if (err) {
-				reject();
-			}
-			const dupRemoved = result.reduce((acc, cur) => {
-				if (acc.indexOf(cur) < 0) {
-					acc.push(cur);
-					return acc;
-				}
-				return acc;
-			}, []);
-			resolve(dupRemoved);
-		});
-	});
-}
 
 function refinePostBlog(reqBody) {
 	const result = { verified: false };

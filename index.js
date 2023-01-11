@@ -33,6 +33,11 @@ const Feed = mongoose.model('Feed', feedSchema);
 app.use(express.json());
 app.use(cookieParser());
 
+app.get('/api/user', (req, res) => {
+	const { user } = jsonwebtoken.verify(req.cookies.access_token, process.env.JWT_SECRET);
+	res.send({ success: true, user });
+});
+
 app.get('/api/feeds', async (req, res) => {
 	const queries = await Feed.find();
 	const response = queries.map(({ title, summaries, tags, article }) => ({
@@ -77,6 +82,7 @@ app.post('/api/login', (req, res) => {
 
 	if (id === process.env.ID && password === process.env.PASSWORD) {
 		result.success = true;
+		result.user = id;
 		const createdToken = jsonwebtoken.sign({ user: process.env.ID }, process.env.JWT_SECRET);
 		res.append('Set-Cookie', `access_token=${createdToken}; Path=/; Max-Age=300; HttpOnly`);
 		res.send(result);

@@ -57,6 +57,13 @@ app.get('/api/article/:id', async (req, res) => {
 app.post('/api/article', async (req, res) => {
 	const response = { success: false };
 
+	try {
+		jsonwebtoken.verify(req.cookies.access_token, process.env.JWT_SECRET);
+	} catch (err) {
+		res.send(response);
+		return;
+	}
+
 	const { verified, ...saveTargets } = refinePostBlog(req.body);
 	if (!verified) {
 		res.send(response);

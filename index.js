@@ -90,7 +90,7 @@ app.post('/api/login', (req, res) => {
 		result.success = true;
 		result.user = id;
 		const createdToken = jsonwebtoken.sign({ user: process.env.ID }, process.env.JWT_SECRET);
-		res.append('Set-Cookie', `access_token=${createdToken}; Path=/; Max-Age=300; HttpOnly`);
+		res.append('Set-Cookie', `access_token=${createdToken}; Path=/; Max-Age=3600; HttpOnly`);
 		res.send(result);
 		return;
 	}

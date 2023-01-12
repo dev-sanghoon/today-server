@@ -4,6 +4,7 @@ const { JSDOM } = require('jsdom');
 const mongoose = require('mongoose');
 const jsonwebtoken = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
+const DOMPurify = require('dompurify');
 
 require('dotenv').config();
 
@@ -50,7 +51,7 @@ app.get('/api/feeds', async (req, res) => {
 
 app.get('/api/article/:id', async (req, res) => {
 	const article = await Article.findOne({ _id: req.params.id });
-	res.send({ content: marked.parse(article.content) });
+	res.send({ content: getHtmlParsedMarkdown(article) });
 });
 
 app.post('/api/article', async (req, res) => {
@@ -84,7 +85,7 @@ app.post('/api/article', async (req, res) => {
 
 app.post('/api/login', (req, res) => {
 	const result = { success: false };
-	const { id, password } = req.body;
+	const [id, password] = [req.body.id, req.body.password].map(getPurified);
 
 	if (id === process.env.ID && password === process.env.PASSWORD) {
 		result.success = true;
@@ -117,7 +118,7 @@ function refinePostBlog(reqBody) {
 	const { content } = reqBody;
 	Object.assign(result, { content });
 
-	const htmlString = marked.parse(content);
+	const htmlString = getHtmlParsedMarkdown(content);
 	const jsDom = new JSDOM(htmlString);
 	const { document } = jsDom.window;
 
@@ -146,4 +147,14 @@ function refinePostBlog(reqBody) {
 
 	result.verified = true;
 	return result;
+}
+
+function getPurified(target) {
+	const window = new JSDOM('').window;
+	const purify = DOMPurify(window);
+	return purify.sanitize(target);
+}
+
+function getHtmlParsedMarkdown(markdown) {
+	return getPurified(marked.parse(markdown));
 }

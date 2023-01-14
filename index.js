@@ -50,8 +50,8 @@ app.get('/api/feeds', async (req, res) => {
 });
 
 app.get('/api/article/:id', async (req, res) => {
-	const article = await Article.findOne({ _id: req.params.id });
-	res.send({ content: getHtmlParsedMarkdown(article) });
+	const { content } = await Article.findOne({ _id: req.params.id });
+	res.send({ content: getHtmlParsedMarkdown(content) });
 });
 
 app.post('/api/article', async (req, res) => {

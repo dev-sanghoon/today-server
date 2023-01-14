@@ -54,6 +54,11 @@ app.get('/api/article/:id', async (req, res) => {
 	res.send({ content: getHtmlParsedMarkdown(content) });
 });
 
+app.post('/api/article/preview', async (req, res) => {
+	const content = getHtmlParsedMarkdown(req.body.content);
+	res.send({ content });
+});
+
 app.post('/api/article', async (req, res) => {
 	const response = { success: false };
 

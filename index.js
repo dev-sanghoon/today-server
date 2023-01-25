@@ -5,8 +5,12 @@ const cookieParser = require('cookie-parser');
 const app = express();
 
 mongoose.connect('mongodb://127.0.0.1:27017/test');
-mongoose.set('debug', true);
-mongoose.set('strictQuery', false);
+
+const isProduction = process.env.NODE_ENV === 'production';
+
+if (!isProduction) {
+	mongoose.set('debug', true);
+}
 
 require('./models/Feed');
 require('./models/Article');

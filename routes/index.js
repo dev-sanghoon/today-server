@@ -10,12 +10,12 @@ const Article = mongoose.model('Article');
 
 const router = express.Router();
 
-router.get('/api/user', (req, res) => {
+router.get('/user', (req, res) => {
 	const { user } = jsonwebtoken.verify(req.cookies.access_token, process.env.JWT_SECRET);
 	res.send({ success: true, user });
 });
 
-router.get('/api/feeds', async (req, res) => {
+router.get('/feeds', async (req, res) => {
 	const queries = await Feed.find();
 	const response = queries.map(({ title, summaries, tags, article }) => ({
 		title,
@@ -26,17 +26,17 @@ router.get('/api/feeds', async (req, res) => {
 	res.send(response);
 });
 
-router.get('/api/article/:id', async (req, res) => {
+router.get('/article/:id', async (req, res) => {
 	const { content } = await Article.findOne({ _id: req.params.id });
 	res.send({ content: getHtmlParsedMarkdown(content) });
 });
 
-router.post('/api/article/preview', async (req, res) => {
+router.post('/article/preview', async (req, res) => {
 	const content = getHtmlParsedMarkdown(req.body.content);
 	res.send({ content });
 });
 
-router.post('/api/article', async (req, res) => {
+router.post('/article', async (req, res) => {
 	const response = { success: false };
 
 	try {
@@ -65,7 +65,7 @@ router.post('/api/article', async (req, res) => {
 	res.send(response);
 });
 
-router.post('/api/login', (req, res) => {
+router.post('/login', (req, res) => {
 	const result = { success: false };
 	const [id, password] = [req.body.id, req.body.password].map(getPurified);
 

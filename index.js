@@ -14,7 +14,7 @@ require('./models/Article');
 app.use(express.json());
 app.use(cookieParser());
 
-app.use(require('./routes'));
+app.use('/api', require('./routes'));
 
 const port = 8080;
 app.listen(port, () => {

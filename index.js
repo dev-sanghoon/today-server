@@ -6,8 +6,6 @@ const jsonwebtoken = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
 const DOMPurify = require('dompurify');
 
-require('dotenv').config();
-
 const app = express();
 
 mongoose.connect('mongodb://127.0.0.1:27017/test');

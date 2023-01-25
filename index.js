@@ -11,7 +11,7 @@ mongoose.set('strictQuery', false);
 require('./models/Feed');
 require('./models/Article');
 
-app.use(express.json());
+app.use(express.json()); // bodyParser not needed on recent version of expressjs
 app.use(cookieParser());
 
 app.use('/api', require('./routes'));

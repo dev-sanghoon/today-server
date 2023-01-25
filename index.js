@@ -14,21 +14,10 @@ mongoose.connect('mongodb://127.0.0.1:27017/test');
 mongoose.set('debug', true);
 mongoose.set('strictQuery', false);
 
-const feedSchema = new mongoose.Schema(
-	{
-		title: String,
-		uploadTime: Date,
-		summaries: [String],
-		tags: [String],
-		article: { type: mongoose.Schema.Types.ObjectId, ref: 'Article' }
-	},
-	{ collection: 'feeds' }
-);
-
-const articleSchema = new mongoose.Schema({ content: String }, { collection: 'articles' });
-
-const Article = mongoose.model('Article', articleSchema);
-const Feed = mongoose.model('Feed', feedSchema);
+require('./models/Feed');
+require('./models/Article');
+const Feed = mongoose.model('Feed');
+const Article = mongoose.model('Article');
 
 app.use(express.json());
 app.use(cookieParser());

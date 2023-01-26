@@ -31,11 +31,6 @@ router.get('/article/:id', async (req, res) => {
 	res.send({ content: getHtmlParsedMarkdown(content) });
 });
 
-router.post('/article/preview', async (req, res) => {
-	const content = getHtmlParsedMarkdown(req.body.content);
-	res.send({ content });
-});
-
 router.post('/article', async (req, res) => {
 	const response = { success: false };
 

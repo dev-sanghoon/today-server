@@ -15,6 +15,22 @@ router.get('/auth', (req, res) => {
 	res.send({ success: true, user });
 });
 
+router.post('/auth', (req, res) => {
+	const result = { success: false };
+	const [id, password] = [req.body.id, req.body.password].map(getPurified);
+
+	if (id === process.env.ID && password === process.env.PASSWORD) {
+		result.success = true;
+		result.user = id;
+		const createdToken = jsonwebtoken.sign({ user: process.env.ID }, process.env.JWT_SECRET);
+		res.append('Set-Cookie', `access_token=${createdToken}; Path=/; Max-Age=3600; HttpOnly`);
+		res.send(result);
+		return;
+	}
+
+	res.send(result);
+});
+
 router.get('/feeds', async (req, res) => {
 	const queries = await Feed.find();
 	const response = queries.map(({ title, summaries, tags, article }) => ({
@@ -24,11 +40,6 @@ router.get('/feeds', async (req, res) => {
 		article
 	}));
 	res.send(response);
-});
-
-router.get('/articles/:id', async (req, res) => {
-	const { content } = await Article.findOne({ _id: req.params.id });
-	res.send({ content: getHtmlParsedMarkdown(content) });
 });
 
 router.post('/articles', async (req, res) => {
@@ -60,20 +71,9 @@ router.post('/articles', async (req, res) => {
 	res.send(response);
 });
 
-router.post('/auth', (req, res) => {
-	const result = { success: false };
-	const [id, password] = [req.body.id, req.body.password].map(getPurified);
-
-	if (id === process.env.ID && password === process.env.PASSWORD) {
-		result.success = true;
-		result.user = id;
-		const createdToken = jsonwebtoken.sign({ user: process.env.ID }, process.env.JWT_SECRET);
-		res.append('Set-Cookie', `access_token=${createdToken}; Path=/; Max-Age=3600; HttpOnly`);
-		res.send(result);
-		return;
-	}
-
-	res.send(result);
+router.get('/articles/:id', async (req, res) => {
+	const { content } = await Article.findOne({ _id: req.params.id });
+	res.send({ content: getHtmlParsedMarkdown(content) });
 });
 
 function refinePostBlog(reqBody) {

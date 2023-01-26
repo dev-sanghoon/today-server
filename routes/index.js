@@ -10,7 +10,7 @@ const Article = mongoose.model('Article');
 
 const router = express.Router();
 
-router.get('/user', (req, res) => {
+router.get('/auth', (req, res) => {
 	const { user } = jsonwebtoken.verify(req.cookies.access_token, process.env.JWT_SECRET);
 	res.send({ success: true, user });
 });
@@ -26,12 +26,12 @@ router.get('/feeds', async (req, res) => {
 	res.send(response);
 });
 
-router.get('/article/:id', async (req, res) => {
+router.get('/articles/:id', async (req, res) => {
 	const { content } = await Article.findOne({ _id: req.params.id });
 	res.send({ content: getHtmlParsedMarkdown(content) });
 });
 
-router.post('/article', async (req, res) => {
+router.post('/articles', async (req, res) => {
 	const response = { success: false };
 
 	try {
@@ -60,7 +60,7 @@ router.post('/article', async (req, res) => {
 	res.send(response);
 });
 
-router.post('/login', (req, res) => {
+router.post('/auth', (req, res) => {
 	const result = { success: false };
 	const [id, password] = [req.body.id, req.body.password].map(getPurified);
 

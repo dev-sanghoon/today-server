@@ -5,8 +5,7 @@
 	"main": "index.js",
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1",
-		"start": "nodemon index.js",
-		"install-mecab-ko": "node_modules/mecab-ya/bin/install-mecab ko"
+		"start": "nodemon index.js"
 	},
 	"repository": {
 		"type": "git",

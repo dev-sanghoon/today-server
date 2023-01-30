@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const FeedSchema = new mongoose.Schema(
 	{
@@ -11,4 +11,4 @@ const FeedSchema = new mongoose.Schema(
 	{ collection: 'feeds' }
 );
 
-mongoose.model('Feed', FeedSchema);
+export default FeedSchema;

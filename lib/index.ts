@@ -1,8 +1,12 @@
-const { marked } = require('marked');
-const { JSDOM } = require('jsdom');
-const DOMPurify = require('dompurify');
+import { marked } from 'marked';
+import { JSDOM } from 'jsdom';
+import DOMPurify from 'dompurify';
 
-function refinePostBlog(reqBody) {
+interface ReqBody {
+	content: string;
+}
+
+function refinePostBlog(reqBody: ReqBody) {
 	const result = { verified: false };
 
 	if (!reqBody) {
@@ -47,14 +51,15 @@ function refinePostBlog(reqBody) {
 	return result;
 }
 
-function getPurified(target) {
+function getPurified(target: string) {
 	const window = new JSDOM('').window;
+	// @ts-expect-error should be handled later - ts migration should be executed
 	const purify = DOMPurify(window);
 	return purify.sanitize(target);
 }
 
-function getHtmlParsedMarkdown(markdown) {
+function getHtmlParsedMarkdown(markdown: string) {
 	return getPurified(marked.parse(markdown));
 }
 
-module.exports = { refinePostBlog, getPurified, getHtmlParsedMarkdown };
+export { refinePostBlog, getPurified, getHtmlParsedMarkdown };

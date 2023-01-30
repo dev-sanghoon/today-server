@@ -1,5 +1,5 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const ArticleSchema = new mongoose.Schema({ content: String }, { collection: 'articles' });
 
-mongoose.model('Article', ArticleSchema);
+export default ArticleSchema;

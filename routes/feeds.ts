@@ -1,7 +1,10 @@
-const router = require('express').Router();
-const mongoose = require('mongoose');
+import express from 'express';
+import mongoose from 'mongoose';
+import { FeedSchema } from '../models';
 
-const Feed = mongoose.model('Feed');
+const router = express.Router();
+
+const Feed = mongoose.model('Feed', FeedSchema);
 router.get('/', async (req, res) => {
 	const queries = await Feed.find();
 	const response = queries.map(({ title, summaries, tags, article }) => ({
@@ -13,4 +16,4 @@ router.get('/', async (req, res) => {
 	res.send(response);
 });
 
-module.exports = router;
+export default router;

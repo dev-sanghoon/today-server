@@ -3,7 +3,7 @@ import { getFeeds, postFeed } from './feeds';
 import { postArticle, getArticle } from './articles';
 
 export default {
-	useMain: () => {
+	use: () => {
 		mongoose.connect('mongodb://127.0.0.1:27017/test');
 
 		const isProduction = process.env.NODE_ENV === 'production';

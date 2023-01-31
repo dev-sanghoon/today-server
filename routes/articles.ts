@@ -1,13 +1,9 @@
 import express from 'express';
-import mongoose from 'mongoose';
 import jsonwebtoken from 'jsonwebtoken';
 import { getHtmlParsedMarkdown, refinePostBlog } from '../lib';
-import { FeedSchema, ArticleSchema } from '../models';
+import mongodb from '../mongodb';
 
 const router = express.Router();
-
-const Feed = mongoose.model('Feed', FeedSchema);
-const Article = mongoose.model('Article', ArticleSchema);
 
 interface SaveTargets {
 	content?: string;
@@ -34,13 +30,15 @@ router.post('/', async (req, res) => {
 	}
 
 	const { content, title, summaries }: SaveTargets = saveTargets;
+	if (!content || !title || !summaries) {
+		res.send(response);
+		return;
+	}
 
 	const uploadTime = new Date();
 
-	const article = new Article({ content });
-	await article.save();
-	const feed = new Feed({ title, uploadTime, summaries, tags: [], article: article._id });
-	await feed.save();
+	const article = await mongodb.postArticle(content || '');
+	await mongodb.postFeed({ title, uploadTime, summaries, tags: [], article: article._id });
 
 	response.success = true;
 	res.send(response);
@@ -48,7 +46,7 @@ router.post('/', async (req, res) => {
 
 router.get('/:id', async (req, res) => {
 	const result = { content: '' };
-	const document = await Article.findOne({ _id: req.params.id });
+	const document = await mongodb.getArticle(req.params.id);
 	if (document && document.content) {
 		result.content = getHtmlParsedMarkdown(document.content);
 		return res.send(result);

@@ -1,20 +1,21 @@
 import express from 'express';
-import mongoose from 'mongoose';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import routes from './routes';
-
-const app = express();
-
-mongoose.connect('mongodb://127.0.0.1:27017/test');
+import mongodb from './mongodb';
 
 dotenv.config();
-const isProduction = process.env.NODE_ENV === 'production';
 
-if (!isProduction) {
-	mongoose.set('debug', true);
+switch (process.env.DATABASE) {
+	case 'mysql':
+		break;
+	case 'mongodb':
+	default:
+		mongodb.useMain();
+		break;
 }
 
+const app = express();
 app.use(express.json()); // bodyParser not needed on recent version of expressjs
 app.use(cookieParser());
 

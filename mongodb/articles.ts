@@ -1,7 +1,9 @@
 import mongoose from 'mongoose';
 
-const ArticleSchema = new mongoose.Schema({ content: String }, { collection: 'articles' });
-const Article = mongoose.model('Article', ArticleSchema);
+const Article = mongoose.model(
+	'Article',
+	new mongoose.Schema({ content: String }, { collection: 'articles' })
+);
 
 const postArticle = async (content: string) => {
 	const article = new Article({ content });

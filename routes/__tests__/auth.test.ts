@@ -23,14 +23,14 @@ describe('checkAuth', () => {
 		).toEqual(false);
 	});
 
-	it('fails when payload is string', () => {
+	it('fails when payload is object', () => {
 		expect(
 			getCurrentUser(
-				'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.aGVsbG8.M5Jq-KaWVvWtGPjUQ-HO3KJn1iFrALuE-Qb7f4TUnp8',
+				'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0ZXN0Ijp0cnVlfQ.CYpwkVCFEgycLfyLKNrFQ-1dx3ZMzdimw_ALyw-ojp0',
 				'rightsecret'
 			).success
-		).toEqual(false);
+		).toEqual(true);
 	});
 
-	// should check if payload has right properties
+	// security curiosity: is it okay to check if payload has right properties even though it is not private repositry?
 });

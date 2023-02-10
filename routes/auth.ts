@@ -4,15 +4,19 @@ import { getPurified } from '../lib';
 
 const router = express.Router();
 
-router.get('/', (req, res) => {
+function getCurrentUser(jwt: string, secret: string | undefined) {
 	const result = { success: false };
-	if (process.env.JWT_SECRET) {
-		const payload = jsonwebtoken.verify(req.cookies.access_token, process.env.JWT_SECRET);
-		if (typeof payload === 'object') {
-			result.success = true;
-			return res.send({ ...result, ...payload });
-		}
+	if (typeof secret !== 'undefined') {
+		jsonwebtoken.verify(jwt, secret, (err, decoded) => {
+			if (err || typeof decoded !== 'object') return;
+			Object.assign(result, { success: true, ...decoded });
+		});
 	}
+	return result;
+}
+
+router.get('/', (req, res) => {
+	const result = getCurrentUser(req.cookies.access_token, process.env.JWT_SECRET);
 	return res.send(result);
 });
 
@@ -30,3 +34,4 @@ router.post('/', (req, res) => {
 });
 
 export default router;
+export { getCurrentUser };

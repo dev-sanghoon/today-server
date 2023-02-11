@@ -1,3 +1,4 @@
+import jsonwebtoken from 'jsonwebtoken';
 import { getCurrentUser } from '../auth';
 
 describe('checkAuth', () => {
@@ -5,32 +6,28 @@ describe('checkAuth', () => {
 		expect(getCurrentUser('aaa', 'bbb')).toHaveProperty('success');
 	});
 
-	it('returns proper data on failure', () => {
-		expect(
-			getCurrentUser(
-				'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.zrSmUOTeO6-5FuPeQudcaPjrdaWJVRKkq5klHDhtyOM',
-				'wrongsecret'
-			)
-		).toEqual({ success: false });
+	const [WRONG_SECRET, RIGHT_SECRET] = ['wrong-secret', 'right-secret'];
+
+	it('fails on token created with wrong secret', () => {
+		const totallyWrongToken = jsonwebtoken.sign('alex', WRONG_SECRET);
+		expect(getCurrentUser(totallyWrongToken, RIGHT_SECRET)).toEqual({
+			success: false
+		});
+
+		const maliciousToken = jsonwebtoken.sign({ user: 'alex' }, WRONG_SECRET);
+		expect(getCurrentUser(maliciousToken, RIGHT_SECRET)).toEqual({
+			success: false
+		});
 	});
 
 	it('fails when payload is string', () => {
-		expect(
-			getCurrentUser(
-				'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.aGVsbG8.M5Jq-KaWVvWtGPjUQ-HO3KJn1iFrALuE-Qb7f4TUnp8',
-				'rightsecret'
-			).success
-		).toEqual(false);
+		const unexpectedToken = jsonwebtoken.sign('alex', RIGHT_SECRET);
+		expect(getCurrentUser(unexpectedToken, RIGHT_SECRET)).toEqual({ success: false });
 	});
 
-	it('fails when payload is object', () => {
-		expect(
-			getCurrentUser(
-				'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0ZXN0Ijp0cnVlfQ.CYpwkVCFEgycLfyLKNrFQ-1dx3ZMzdimw_ALyw-ojp0',
-				'rightsecret'
-			).success
-		).toEqual(true);
+	it('succeeds when payload is object, and should have user property', () => {
+		const properToken = jsonwebtoken.sign({ user: 'alex' }, RIGHT_SECRET);
+		expect(getCurrentUser(properToken, RIGHT_SECRET).success).toEqual(true);
+		expect(getCurrentUser(properToken, RIGHT_SECRET)).toHaveProperty('user');
 	});
-
-	// security curiosity: is it okay to check if payload has right properties even though it is not private repositry?
 });

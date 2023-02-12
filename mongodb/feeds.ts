@@ -23,13 +23,19 @@ interface FeedInfo {
 }
 
 const getFeeds = async () => {
-	const queries = await Feed.find();
-	return queries.map(({ title, summaries, tags, article }) => ({
+	const queries = await Feed.find().sort({ uploadTime: -1 });
+	return queries.map(({ title, uploadTime, summaries, article }) => ({
 		title,
-		summaries,
-		tags,
+		uploadTimeStr: getLocaleDate(uploadTime),
+		summary: summaries.join(' '),
 		article
 	}));
+
+	function getLocaleDate(date: Date | undefined) {
+		const KR = 'ko-KR';
+		date ? date : (date = new Date(0));
+		return date.toLocaleString(KR);
+	}
 };
 
 const postFeed = async (feedData: FeedInfo) => {

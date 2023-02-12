@@ -32,9 +32,9 @@ const getFeeds = async () => {
 	}));
 
 	function getLocaleDate(date: Date | undefined) {
-		const KR = 'ko-KR';
+		const KR = 'en';
 		date ? date : (date = new Date(0));
-		return date.toLocaleString(KR);
+		return date.toLocaleDateString(KR);
 	}
 };
 

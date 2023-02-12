@@ -1,7 +1,7 @@
 import jsonwebtoken from 'jsonwebtoken';
 import { getCurrentUser } from '../auth';
 
-describe('checkAuth', () => {
+describe('getCurrentUser', () => {
 	it('should have success status', () => {
 		expect(getCurrentUser('aaa', 'bbb')).toHaveProperty('success');
 	});
